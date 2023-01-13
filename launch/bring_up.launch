@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- main info -->
+  <arg name="task" default="Demo"/>
+  <arg name="lang" default="en"/> 
+
+  <!-- ###################################################################### -->
+  <!-- ###################################################################### -->
+  <!-- ###################################################################### -->
+
+  <!-- start task -->
+  <node name="$(arg task)" pkg="tasks" type="$(arg task).py" output="screen">
+    <param name="lang" value="$(arg lang)" />
+  </node>
+
+</launch>
