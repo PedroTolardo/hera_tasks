@@ -66,27 +66,30 @@ class Task():
         aux = False
 #        actions.goto('start')
 #        actions.talk('Starting task')
-#        actions.manip("open")
-#        actions.manip("home")
-#        actions.head("",3.0)
-#
-#        actions.goto('shelf')
-#        actions.move('foward', seconds=1.5)
-        actions.head("",3.0)
+
+        actions.head("reset",0.0)
+        actions.manip("open")
+        actions.manip("home")#
+        actions.goto('table')
+        actions.head("",3.1)
         while not aux:
             coordinates = actions.find_obj('closest')
             print("coordenda: ",coordinates)
             if coordinates is not None:
-    
-                success = actions.manip_goal(coordinates, 'pick2')
-            
+                success = actions.manip_goal(coordinates, 'pick')
+                print (success)
                 if success == "success":
-                    actions.talk("pick executado")
-            #    actions.head("reset",0.0)
-                    success = actions.manip_goal(coordinates, 'place2')
-                    if success:
-                        actions.talk("place executado")
+                    aux = True
+                    actions.head("reset",0.0)
+                    actions.goto('shelf')
+                    success2 = actions.manip_goal(coordinates, 'table_place')
+                    if success2:
+                        actions.manip("open")
+                        actions.manip("home")
                         aux = True
+                else:
+                    actions.manip("open")
+
 
             #    aux = True
             #else :
