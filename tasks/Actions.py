@@ -18,7 +18,7 @@ from hera.srv import question
 
 from std_msgs.msg import Float32
 
-from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Pose, PoseStamped
 import tf2_ros
 from tf2_ros import TransformException as Exception, ConnectivityException, LookupException, ExtrapolationException
 import tf2_geometry_msgs
@@ -38,7 +38,7 @@ from hera_objects.msg import *
 
 # from people.srv import Once
 
-from social_worlds.srv import *
+#from social_worlds.srv import *
 from map.srv import SaveLocal
 
 from hera_face.srv import *
@@ -71,7 +71,7 @@ class Actions():
         self.objects = rospy.ServiceProxy('/objects', FindObject)
         self.save_obj_local = rospy.ServiceProxy('/map/save_local', SaveLocal)
         self.save_face = rospy.ServiceProxy('/face_captures', face_capture)
-        self.detected = rospy.ServiceProxy('/detect_output', detect_output)
+        #self.detected = rospy.ServiceProxy('/detect_output', detect_output)
         self.recog_face = rospy.ServiceProxy('/face_recog', face_list)
         #self.color_filter = rospy.ServiceProxy('/color_filter', color_detect)
         self.specific_object = rospy.ServiceProxy('/specific_object', FindSpecificObject)
@@ -185,7 +185,7 @@ class Actions():
             
             pose_2 = Pose()
             #tf Obj -> robo
-            (obj_trans, obj_rot) = self.tf_listener.lookupTransform('/base', "/pose_1", rospy.Time(0))
+            (obj_trans, obj_rot) = self.tf_listener.lookupTransform('/base', '/pose_1', rospy.Time(0))
             pose_2.position.x = obj_trans[0] 
             pose_2.position.y = obj_trans[1]
             pose_2.position.z = obj_trans[2]
@@ -202,7 +202,7 @@ class Actions():
             #--------------------------------------
 
             print("Pose2_dps:",pose_2)
-            pose_stamped = geometry_msgs.msg.PoseStamped()
+            pose_stamped = PoseStamped()
             pose_stamped.pose = pose_2
             pose_stamped.header.frame_id = '/base'
             pose_stamped.header.stamp = rospy.Time(0)
@@ -344,8 +344,6 @@ class Actions():
             self.client_gotosocial.wait_for_result()
             return self.client_gotosocial.get_result()
 
-
-
     def gotopose(self, location, frame, wait=True):
         if location==None:
             self.client_goto.cancel_all_goals()
@@ -398,21 +396,21 @@ class Actions():
         #print("resp: ", resp)
         #return resp
 
-    def face_move_recog(self, request, rep):
-        for i in range(rep):
-            resp = self.recog_face(request)
+    #def face_move_recog(self, request, rep):
+    #    for i in range(rep):
+    #        resp = self.recog_face(request)
+#
+    #        if resp.result == '':
+    #            self.move('foward', 0.1, 0.1)
+    #            self.move('stop', 0, 0)
 
-            if resp.result == '':
-                self.move('foward', 0.1, 0.1)
-                self.move('stop', 0, 0)
+    #         else:
+    #             break
 
-            else:
-                break
-
-        print("resp: ", resp.result)
-        print("center: ", resp.center)
+    #     print("resp: ", resp.result)
+    #     print("center: ", resp.center)
         
-        return resp.result, resp.center
+    #     return resp.result, resp.center
 
 
     def lugar_vazio(self, guest1, guest2, guest3):
@@ -451,12 +449,12 @@ class Actions():
         else:
             return None
         
-    def color_filter(self, request):
-        resp = self.recog_face(request)
-        print("center x: ", resp.center_x)
-        print("center y: ", resp.center_y)
+    # def color_filter(self, request):
+    #     resp = self.recog_face(request)
+    #     print("center x: ", resp.center_x)
+    #     print("center y: ", resp.center_y)
         
-        return resp.center_x, resp.center_y 
+    #     return resp.center_x, resp.center_y 
 
     def center_filter(self,vel,time):
         check_x = False
@@ -574,7 +572,7 @@ class Actions():
         play(wav_file)
 
     def beep(self):
-        wav_file = AudioSegment.from_file(file = "/home/robofei/catkin_hera/src/3rdParty/speech_recognition/gsr_ros/cricket-sound.ogg")
+        wav_file = AudioSegment.from_file(file = "/home/robofei/catkin_hera/src/3rdParty/speech_recognition/gsr_ros/beep.ogg")
         play(wav_file)
 
     def move(self, cmd, vel=0.2, seconds=0.0):
@@ -583,14 +581,14 @@ class Actions():
         self.client_move.wait_for_result()
         return self.client_move.get_result()
 
-    def follow(self, location, wait=True):
-        if location==None:
-            self.client_follow.cancel_all_goals()
-            return
-
-        goal = followGoal(location=location)
-        self.client_follow.send_goal(goal)
-        if wait:
-            self.client_follow.wait_for_result()
-            return self.client_follow.get_result()
+    #def follow(self, location, wait=True):
+    #    if location==None:
+    #        self.client_follow.cancel_all_goals()
+    #        return
+#
+    #    goal = followGoal(location=location)
+    #    self.client_follow.send_goal(goal)
+    #    if wait:
+    #        self.client_follow.wait_for_result()
+    #        return self.client_follow.get_result()
 
