@@ -152,10 +152,7 @@ class Actions():
         pose_stamped.header.stamp = rospy.Time.now()
 
         try:
-            # ** It is important to wait for the listener to start listening. Hence the rospy.Duration(1)
             output_pose_stamped = tf_buffer.transform(pose_stamped, to_frame, rospy.Duration(1))
-            # transform = tf_buffer.lookup_transform(to_frame, from_frame, rospy.Duration(1))
-            # output_pose = tf2_geometry_msgs.do_transform_pose(pose_stamped, transform)
             return output_pose_stamped.pose
 
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
@@ -533,52 +530,6 @@ class Actions():
                 self.move('backward')
         self.move('stop')
 
-    def recog_garbage(self, range, dist):
-        rospy.wait_for_message('/base_scan_front', LaserScan)
-        # rospy.loginfo(self.laser_ran)
-        enter_bin = 0
-        while enter_bin != 3:
-            laser_ran = self.laser_ran
-            amp_ang = 166  # Amplitude de leitura do laser(graus)
-            range_size = len(laser_ran)  # Numero de medidas lidas pelo laser
-            lim_ang = 60  # Angulo para limitar a leitura
-            lim_laser = round(lim_ang * range_size / amp_ang)
-            filter_range = laser_ran[int((range_size / 2) - (lim_laser / 2)):int(
-                (range_size / 2) + (lim_laser / 2))]  # Leitura limitada
-            center_bin = filter_range.index(min(filter_range))
-            center_range = filter_range.index(filter_range[int(len(filter_range) / 2)])
-            # rospy.loginfo(center_bin)
-            # rospy.loginfo(center_range)
-
-            if (center_range > center_bin + (range / 2)):
-                # rospy.loginfo("vai pra direita")
-                enter_bin = 2
-                self.move('spin_right')  # inverter
-
-
-            elif (center_range < center_bin - (range / 2)):
-                # rospy.loginfo("vai pra esquerda")
-                enter_bin = 1
-                self.move('spin_left')
-            else:
-                # rospy.loginfo("chegou")
-                enter_bin = 3
-                self.move('stop')
-                pass
-        dist_robo = laser_ran[int(len(laser_ran) / 2)]
-        if (dist_robo > dist):
-            while (dist_robo > dist):
-                laser_ran = self.laser_ran
-                dist_robo = laser_ran[int(len(laser_ran) / 2)]
-                self.move('foward', 0.1)
-                # self.move('backward')
-        elif (dist_robo < dist):
-            while (dist_robo < dist):
-                laser_ran = self.laser_ran
-                dist_robo = laser_ran[int(len(laser_ran) / 2)]
-                # self.move('foward')
-                self.move('backward', 0.1)
-        self.move('stop')
 
     def click(self):
         wav_file = AudioSegment.from_file(file="/home/robofei/catkin_hera/src/3rdParty/vision_system/audio.wav",
