@@ -18,6 +18,7 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
 from typing import Any, Optional, Union
 
+
 class Navigation:
     """
     A class that contains the navigation methods of the HERA robot.
@@ -41,8 +42,8 @@ class Navigation:
         Callback function for the laser subscriber.
     save_local(self, location)
         Saves the current local map to the specified location.
-    goto(self, x, y, theta)
-        Moves the robot to the specified pose.
+    goto(self, location, wait)
+        Moves the robot to the specified location.
     goto_social(self, x, y, theta)
         Moves the robot to the specified pose.
     goto_pose(self, x, y, theta)
@@ -56,6 +57,7 @@ class Navigation:
 
 
     """
+
     def __init__(self) -> None:
 
         self.tf_buffer: tf2_ros.Buffer = tf2_ros.Buffer()
@@ -148,7 +150,7 @@ class Navigation:
         self.client_pose.wait_for_result()
         return self.client_pose.get_result()
 
-    def goto(self, location: str, wait: bool=True) -> Optional[str]:
+    def goto(self, location: str, wait: bool = True) -> Optional[str]:
         """
         Moves the robot to the specified location in the map frame.
 
@@ -166,6 +168,31 @@ class Navigation:
         if wait:
             self.client_goto.wait_for_result()
             return self.client_goto.get_result()
+
+    def goto_multiple(self, locations: list, wait: bool = True) -> Optional[dict]:
+        """
+        Moves the robot to the specified location in the map frame.
+
+        :param locations: The location list to move to
+        :param wait: Whether to wait for the movement to finish.
+        :return: None if there is no result, otherwise a string indicating the result of the movement.
+        """
+        results = []
+
+        if locations is None:
+            self.client_goto.cancel_all_goals()
+            return
+
+        for location in locations:
+            rospy.loginfo("Going to location: " + location)
+            goal = gotoGoal(location=location)
+            self.client_goto.send_goal(goal)
+            if wait:
+                self.client_goto.wait_for_result()
+                results.append(self.client_goto.get_result())
+
+        result_dict = dict(zip(locations, results))
+        return result_dict
 
     def goto_social(self, location, wait=True) -> Optional[str]:
         """
@@ -265,8 +292,3 @@ class Navigation:
             rospy.sleep(0.1)
             robot_distance = filtered_range[int(len(filtered_range) / 2)]
         self.move('stop', 0.0, 0.0)
-
-
-
-
-
