@@ -36,11 +36,11 @@ class Manipulator:
         self.head_service = rospy.ServiceProxy('/head_service', Head)
 
         # wait for servers
-        print('Waiting for server: manipulator_service')
+        rospy.loginfo('Waiting for server: manipulator')
         rospy.wait_for_service('/manipulator')
-        print('Waiting for server: dynamixel')
+        rospy.loginfo('Waiting for server: dynamixel_controller/dynamixel_command')
         rospy.wait_for_service('/dynamixel_controller/dynamixel_command')
-        print('Waiting for server: head_service')
+        rospy.loginfo('Waiting for server: head_service')
         rospy.wait_for_service('/head_service')
 
 
