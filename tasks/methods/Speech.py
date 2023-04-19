@@ -1,5 +1,8 @@
 import actionlib
 import rospy
+import rospkg
+from pydub import AudioSegment
+from pydub.playback import play
 from hera.msg import (hearFeedback, hearResult, hearAction, hearGoal,
                       talkFeedback, talkResult, talkAction, talkGoal)
 
@@ -34,6 +37,11 @@ class Speech:
         rospy.loginfo('Waiting for server: talk')
         self.client_talk.wait_for_server()
 
+        rospack = rospkg.RosPack()
+
+        def ask(self, question: question.Request) -> question.Response:
+            return self.ask(question).result
+
         def talk(self, phrase: str, from_language: str = 'en', to_language: str = 'en') -> talkResult:
             """
             A method that speaks a phrase
@@ -51,3 +59,10 @@ class Speech:
             self.client_hear.send_goal(goal)
             self.client_hear.wait_for_result()
             return self.client_hear.get_result()
+
+        def play_sound(self, sound: str):
+            """
+            A method that plays a sound
+            """
+            audio = AudioSegment.from_file(file=(str(rospack.getpath('speech_recognition') + '/sounds/' + sound + '.mp3')))
+            play(audio)
