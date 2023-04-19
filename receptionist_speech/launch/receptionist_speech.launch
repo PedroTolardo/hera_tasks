@@ -1,0 +1,5 @@
+<?xml version='1.0'?>
+<launch>
+    <node pkg="receptionist_speech" type="Speech_receptionist_work_object.py" name="Receptionist" output="screen">
+    </node>
+</launch>
