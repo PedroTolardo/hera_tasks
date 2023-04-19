@@ -5,6 +5,7 @@ from hera_control.msg import Head_Goal, Manip_Goal
 from hera_control.srv import Head, Manip
 from std_msgs.msg import Float32
 
+
 class Manipulator:
     """
     A class that represents the manipulator of the HERA robot.
@@ -29,6 +30,7 @@ class Manipulator:
     head(self, type="", tilt=0.0)
         Move the head of the HERA robot to the desired position.
     """
+
     def __init__(self, lang):
         # init clients
         self.manipulator_service = rospy.ServiceProxy('/manipulator', Manip)
@@ -42,7 +44,6 @@ class Manipulator:
         rospy.wait_for_service('/dynamixel_controller/dynamixel_command')
         rospy.loginfo('Waiting for server: head_service')
         rospy.wait_for_service('/head_service')
-
 
     def send_goal(self, coordinates, type=""):
         manipulator = Manip_Goal()
