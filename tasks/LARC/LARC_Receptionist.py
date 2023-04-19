@@ -50,8 +50,9 @@ class Receptionist:
         srv_names = StartRequest()
         srv_names.spec  = ['James', 'Robert', 'John', 'Joan', 'Michael', 'David', 'William', 'Richard', 'Joseph', 'Thomas', 'Charles', 'Mary', 'Patricia', 'Jennifer', 'Linda', 'Elizabeth', 'Barbara', 'Susan', 'Jessica', 'Sarah', 'Karen']
         #drinks
-        srv_drinks = StartRequest()
+        srv_drinks:  = StartRequest()
         srv_drinks.spec=  ['coconut water', 'Coke', 'Guarana','ice tea', 'tonic', 'water']
+
         drink = ['','','']
         drink_completo = ['', '', '']
         srv_resp = StartRequest()

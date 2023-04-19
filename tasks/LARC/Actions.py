@@ -6,15 +6,14 @@ from hera.msg import poseFeedback, poseResult, poseAction, poseGoal
 from hera.msg import gotoFeedback, gotoResult, gotoAction, gotoGoal
 from hera.msg import gotosocialFeedback, gotosocialResult, gotosocialAction, gotosocialGoal
 from hera.msg import gotoposeFeedback, gotoposeResult, gotoposeAction, gotoposeGoal
-from hera.msg import talkFeedback, talkResult, talkAction, talkGoal
-from hera.msg import hearFeedback, hearResult, hearAction, hearGoal
+
 from hera.msg import faceFeedback, faceResult, faceAction, faceGoal
 from hera.msg import moveFeedback, moveResult, moveAction, moveGoal
 # from hera.msg import followFeedback, followResult, followAction, followGoal
 from hera.msg import savelocalFeedback, savelocalResult, savelocalAction, savelocalGoal
 from hera.msg import headFeedback, headResult, headAction, headGoal
 
-from hera.srv import question
+
 
 from std_msgs.msg import Float32
 
@@ -57,7 +56,7 @@ class Actions():
     def __init__(self, lang):
 
         self.lang = lang
-        self.tf_listener = tf.TransformListener()
+
 
         self.odom = None
         rospy.Subscriber('odom', Odometry, self.callback_odom)
@@ -81,8 +80,8 @@ class Actions():
         self.client_goto = actionlib.SimpleActionClient('/goto', gotoAction)
         self.client_gotosocial = actionlib.SimpleActionClient('/gotosocial', gotosocialAction)
         self.client_gotopose = actionlib.SimpleActionClient('/gotopose', gotoposeAction)
-        self.client_talk = actionlib.SimpleActionClient('/talk', talkAction)
-        self.client_hear = actionlib.SimpleActionClient('/hear', hearAction)
+
+
         self.client_face = actionlib.SimpleActionClient('/face', faceAction)
         self.client_move = actionlib.SimpleActionClient('/move', moveAction)
         # self.client_follow = actionlib.SimpleActionClient('/follow', followAction)
@@ -124,39 +123,12 @@ class Actions():
         print('wait for server: head')
         # self.client_head.wait_for_server()
 
-    def callback_odom(self, msg):
-        self.odom = msg.pose.pose
-
-    def callback_laser(self, msg):
-        self.laser_ran = (msg.ranges)
-
     def question(q):
         resp = self.question(q)
         return resp.result
 
-    def savelocal(self, local):
-        goal = savelocalGoal(location=local)
-        self.client_savelocal.send_goal(goal)
-        self.client_savelocal.wait_for_result()
-        return self.client_savelocal.get_result()
 
-    def transform_pose(input_pose, from_frame, to_frame):
 
-        # **Assuming /tf2 topic is being broadcasted
-        tf_buffer = tf2_ros.Buffer()
-        listener = tf2_ros.TransformListener(tf_buffer)
-
-        pose_stamped = tf2_geometry_msgs.PoseStamped()
-        pose_stamped.pose = input_pose
-        pose_stamped.header.frame_id = from_frame
-        pose_stamped.header.stamp = rospy.Time.now()
-
-        try:
-            output_pose_stamped = tf_buffer.transform(pose_stamped, to_frame, rospy.Duration(1))
-            return output_pose_stamped.pose
-
-        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-            raise
 
     def save_obj_location(self, name, obj, dist):
         for i in range(2):
@@ -211,7 +183,7 @@ class Actions():
             else:
                 rospy.logerr('Transformation is not possible!')
                 sys.exit(0)
-            # pose_final.position.x = transformed_pose[0] 
+            # pose_final.position.x = transformed_pose[0]
             # pose_final.position.y = transformed_pose[1]
             # pose_final.position.z = transformed_pose[2]
             # pose_final.orientation.x = transformed_rot[0]
@@ -253,47 +225,7 @@ class Actions():
     #     #print("resp: ",resp)
     #     return True #if resp.result == 'SUCCEDED' else False
 
-    def manip(self, tipo="", x=0.0, y=0, z=0, rx=0, ry=0, rz=0):
-        m3 = Manip3_Goal()
-        m3.x = x
-        m3.y = y
-        m3.z = z
-        m3.rx = rx
-        m3.ry = ry
-        m3.rz = rz
-        success = self.manipulator(tipo, m3)
-        return success.result
 
-    def manip_goal(self, goal, tipo=""):
-        m3 = Manip3_Goal()
-        m3.x = goal.position.x
-        m3.y = goal.position.y
-        m3.z = goal.position.z
-        m3.rx = goal.position.rx
-        m3.ry = goal.position.ry
-        m3.rz = goal.position.rz
-        success = self.manipulator(tipo, m3)
-        return success.result
-
-    def dynamixel_goal(self, id, position):
-        self.dynamixel('', id, 'Goal_Position', position)
-        return True
-
-    def find_obj(self, condition=""):
-        resp = self.objects(condition)
-        values = [resp.position.x, resp.position.y, resp.position.z]
-        if all(v == 0.0 for v in values):
-            return None
-        else:
-            return resp
-
-    def FindSpecificObject(self, tipo=""):
-        resp = self.specific_object(tipo)
-        values = [resp.position.x, resp.position.y, resp.position.z]
-        if all(v == 0.0 for v in values):
-            return None
-        else:
-            return resp
 
     # def FindSpecificObject(self, tipo=""):
     #     resp = self.specific_object(tipo)
@@ -303,75 +235,11 @@ class Actions():
     #     else:
     #         return resp.position
 
-    def head(self, tipo="", tilt=0.0):
-        h = Head_Goal()
-        h.z = tilt
-        resp = self.head_interface(tipo, h)
-        return True if resp.result == 'SUCCEEDED' else False
-
-    def pose(self, location):
-        goal = poseGoal(location=location)
-        self.client_pose.send_goal(goal)
-        self.client_pose.wait_for_result()
-        return self.client_pose.get_result()
 
     def people(self):
         resp = self.people()
         return resp.people
 
-    def goto(self, location, wait=True):
-        if location == None:
-            self.client_goto.cancel_all_goals()
-            return
-        goal = gotoGoal(location=location)
-        self.client_goto.send_goal(goal)
-        if wait:
-            self.client_goto.wait_for_result()
-            return self.client_goto.get_result()
-
-    def goto_multiple(self, locations, wait=True):
-        reached_locations = []
-        if locations is None:
-            self.client_goto.cancel_all_goals()
-            return
-
-        for i in range(len(locations)):
-            self.goto(locations[i], wait)
-            reached_locations.append(locations[i])
-        return reached_locations
-
-    def gotosocial(self, location, wait=True):
-        if location == None:
-            self.client_gotosocial.cancel_all_goals()
-            return
-        goal = gotosocialGoal(location=location)
-        self.client_gotosocial.send_goal(goal)
-        if wait:
-            self.client_gotosocial.wait_for_result()
-            return self.client_gotosocial.get_result()
-
-    def gotopose(self, location, frame, wait=True):
-        if location == None:
-            self.client_goto.cancel_all_goals()
-            return
-        goal = gotoGoal(location=location, reference=frame)
-        self.client_goto.send_goal(goal)
-        if wait:
-            self.client_goto.wait_for_result()
-            return self.client_goto.get_result()
-
-    def talk(self, phrase, from_lang="en", to_lang=None):
-        if (not to_lang): to_lang = self.lang
-        goal = talkGoal(phrase=phrase, from_lang=from_lang, to_lang=to_lang)
-        self.client_talk.send_goal(goal)
-        self.client_talk.wait_for_result()
-        return self.client_talk.get_result()
-
-    def hear(self, srv):
-        goal = hearGoal(spec=srv.spec, choices=srv.choices)
-        self.client_hear.send_goal(goal)
-        self.client_hear.wait_for_result()
-        return self.client_hear.get_result()
 
     def face(self):
         goal = faceGoal()
@@ -494,58 +362,6 @@ class Actions():
                 check_pose = True
         return True
 
-    def laser_line(self, dist):
-        rospy.wait_for_message('/base_scan_front', LaserScan)
-        # rospy.loginfo(self.laser_ran)
-        aux = 0
-        while (aux == 0):
-            laser_ran = self.laser_ran
-            amp_ang = 166  # Amplitude de leitura do laser(graus)
-            range_size = len(laser_ran)  # Numero de medidas lidas pelo laser
-            lim_ang = 15  # Angulo para limitar a leitura
-            lim_laser = round(lim_ang * range_size / amp_ang)
-            start = laser_ran[int((range_size / 2) - (lim_laser / 2))]  # left
-            end = laser_ran[int((range_size / 2) + (lim_laser / 2))]  # right
-            diff = start - end
-            if (diff > 0.001):
-                self.move('spin_left')
-            elif (diff < -0.001):
-                self.move('spin_right')
-            else:
-                self.move('stop')
-                # print("alinhado")
-                aux = 1
-        dist_robo = laser_ran[int(len(laser_ran) / 2)]
-        if (dist_robo > dist):
-            while (dist_robo > dist):
-                laser_ran = self.laser_ran
-                dist_robo = laser_ran[int(len(laser_ran) / 2)]
-                self.move('foward')
-                # self.move('backward')
-        elif (dist_robo < dist):
-            while (dist_robo < dist):
-                laser_ran = self.laser_ran
-                dist_robo = laser_ran[int(len(laser_ran) / 2)]
-                # self.move('foward')
-                self.move('backward')
-        self.move('stop')
-
-
-    def click(self):
-        wav_file = AudioSegment.from_file(file="/home/robofei/catkin_hera/src/3rdParty/vision_system/audio.wav",
-                                          format="wav")
-        play(wav_file)
-
-    def beep(self):
-        wav_file = AudioSegment.from_file(
-            file="/home/robofei/catkin_hera/src/3rdParty/speech_recognition/gsr_ros/beep.ogg")
-        play(wav_file)
-
-    def move(self, cmd, vel=0.2, seconds=0.0):
-        goal = moveGoal(cmd=cmd, vel=vel, seconds=seconds)
-        self.client_move.send_goal(goal)
-        self.client_move.wait_for_result()
-        return self.client_move.get_result()
 
     # def follow(self, location, wait=True):
     #    if location==None:
