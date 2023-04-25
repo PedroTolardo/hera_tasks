@@ -6,8 +6,8 @@ from tf import TransformListener
 from geometry_msgs.msg import Pose, PoseStamped
 
 from hera.msg import faceFeedback, faceResult, faceAction, faceGoal
-from hera_objectects.srv import Findobjectect, FindSpecificobjectect
-from hera_objectects.msg import *
+from hera_objects.srv import Findobject, FindSpecificobject
+from hera_objects.msg import *
 from hera_face.srv import *
 
 
@@ -18,16 +18,16 @@ class Perception:
         self.face_checking = rospy.ServiceProxy('/face_check', face_check)
         self.save_face = rospy.ServiceProxy('/face_captures', face_capture)
         self.recog_face = rospy.ServiceProxy('/face_recog', face_list)
-        self.objectects = rospy.ServiceProxy('/objectects', Findobjectect)
+        self.objects = rospy.ServiceProxy('/objects', FindObject)
         self.color_filter = rospy.ServiceProxy('/color_filter', color_detect)
-        self.specific_objectect = rospy.ServiceProxy('/specific_objectect', FindSpecificobjectect)
+        self.specific_object = rospy.ServiceProxy('/specific_object', FindSpecificObject)
 
         self.client_face = actionlib.SimpleActionClient('/face', faceAction)
 
-        rospy.loginfo('Waiting for server: objectects')
-        rospy.wait_for_service('/objectects')
-        rospy.loginfo('Waiting for server: specific_objectect')
-        rospy.wait_for_service('/specific_objectect')
+        rospy.loginfo('Waiting for server: objects')
+        rospy.wait_for_service('/objects')
+        rospy.loginfo('Waiting for server: specific_object')
+        rospy.wait_for_service('/specific_object')
 
         rospy.loginfo('Waiting for server: face')
         self.client_face.wait_for_server()
@@ -127,3 +127,26 @@ class Perception:
             return None
         else:
             return resp
+
+    def people(self):
+        answer = self.people()
+        return answer.people
+
+    def save_face(self, request):
+        answer = self.save_face(request)
+        return str(answer)
+
+    def face_recog(self, request):
+        resp = self.recog_face(request)
+        rospy.loginfo('Resp: ', resp.result)
+        rospy.loginfo('Center: ', resp.center)
+        rospy.loginfo('Num: ', resp.num)
+        return resp.result, resp.center, resp.num
+
+    def obj_output(self, request):
+        resp = self.detected(request)
+        return str(resp)
+
+    def face_check(self):
+        resp = self.face_checking('')
+        return resp.result
