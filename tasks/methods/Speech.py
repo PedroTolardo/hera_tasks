@@ -66,3 +66,5 @@ class Speech:
             """
             audio = AudioSegment.from_file(file=(str(rospack.getpath('speech_recognition') + '/sounds/' + sound + '.mp3')))
             play(audio)
+
+        
