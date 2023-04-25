@@ -7,33 +7,9 @@ class General:
         self.navigation = Navigation()
         self.perception = Perception()
 
-    @staticmethod
-    def find_available_seat(self, *guests, num_seats: int = 5):
-        # Cria uma lista de assentos vazios
-        seats = [False] * num_seats
-        # Calcula os pontos médios de cada assento
-        seat_points = [640 * (2 * i + 1) / (2 * num_seats) for i in range(num_seats)]
-
-        # Itera sobre cada convidado
-        for guest in guests:
-            # Verifica em qual intervalo de assentos o convidado se encaixa
-            for i in range(num_seats - 1):
-                if seat_points[i] <= guest < seat_points[i + 1]:
-                    # Marca o assento como ocupado
-                    seats[i + 1] = True
-                    # Para de procurar por assentos
-                    break
-            else:
-                # Se o convidado não se encaixar em nenhum intervalo, assume o primeiro assento como ocupado
-                seats[0] = True
-
-        # Itera sobre cada assento e retorna o primeiro que estiver vazio
-        for i, seat in enumerate(seats):
-            if not seat:
-                return seat_points[i]
-
-        # Retorna None se todos os assentos estiverem ocupados
-        return None
+    def question(self, question):
+        answer = self.question(question)
+        return answer.result
 
     def lugar_vazio(self, guest1, guest2, guest3):
         num_lugares = 5
