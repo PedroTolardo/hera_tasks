@@ -1,15 +1,11 @@
 import rospy
 import json
 
-import General
-import Speech
-import Perception
+import methods.General as General
+import methods.Speech as Speech
+import methods.Perception as Perception
 import methods.Navigation as Navigation
-import Manipulator
-
-from gsr_ros.srv import StartRequest
-from gsr_ros.msg import Opcs
-
+import methods.Manipulator as Manipulator
 
 class StoringGroceries:
     """
@@ -27,28 +23,38 @@ class StoringGroceries:
         self.manipulator = Manipulator.Manipulator()
         self.general = General.General()
 
-        self.known_places = json.loads(self.general.question('know_places').result)
+        self.locals = ['table', 'cabinet']
 
     def task(self):
         """
         Main task of the robot.
         :return: None
         """
-        navigation.goto(table)
+        object_result = False
+        self.speech.talk("Starting Storing Groceries Task.")
+        for i in range(5):
+            self.navigation.goto(self.locals[0])
+            self.speech.talk('Trying to pick object')
+            while not object_result:
+                obj_coordinates = self.perception.find_obj('closest')
+                if obj_coordinates is not None:
+                    manip_result = self.manipulator.send_goal(obj_coordinates, 'pick')
+                    if manip_result == 'success':
+                        object_result = True
+                        self.speech.talk('Object picked')
+                    else:
+                        self.speech.talk('Object not picked, trying again')
+                        self.manipulator.send_goal('open')
+                        self.manipulator.send_goal('home')
+                        self.navigation.move('spin_left', 0.3)
+                        rospy.sleep(1)
 
-        object_coordinates = perception.find_obj('closest')
-
-        manipulator.send_goal('attack')
-        manipulator.send_goal(object_coordinates)
-
-        navigation.goto(cabinet)
-        navigation.align_with_object(0.3)
-
-
-
-
-
-
-
-
-
+        self.speech.talk('Going to cabinet')
+        self.navigation.goto(self.locals[1])
+        while not object_result:
+            manip_result = self.manipulator.send_goal('place')
+            if manip_result == 'success':
+                object_result = True
+                self.speech.talk('Object placed')
+            else:
+                self.speech.talk('Object not placed correctly, trying again')
