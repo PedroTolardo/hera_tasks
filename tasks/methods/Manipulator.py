@@ -31,7 +31,7 @@ class Manipulator:
         Move the head of the HERA robot to the desired position.
     """
 
-    def __init__(self, lang):
+    def __init__(self):
         # init clients
         self.manipulator_service = rospy.ServiceProxy('/manipulator', Manip)
         self.dynamixel = rospy.ServiceProxy('/dynamixel_controller/dynamixel_command', DynamixelCommand)
