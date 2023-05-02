@@ -37,34 +37,34 @@ class Speech:
         rospy.loginfo('Waiting for server: talk')
         self.client_talk.wait_for_server()
 
-        rospack = rospkg.RosPack()
+        self.rospack = rospkg.RosPack()
 
-        def ask(self, question: question.Request) -> question.Response:
-            return self.ask(question).result
+    def ask(self, question):
+        return self.ask(question).result
 
-        def talk(self, phrase: str, from_language: str = 'en', to_language: str = 'en') -> talkResult:
-            """
-            A method that speaks a phrase
-            """
-            goal = talkGoal(phrase=phrase, from_language=from_language, to_language=to_language)
-            self.client_talk.send_goal(goal)
-            self.client_talk.wait_for_result()
-            return self.client_talk.get_result()
+    def talk(self, phrase: str, from_language: str = 'en', to_language: str = 'en') -> talkResult:
+        """
+        A method that speaks a phrase
+        """
+        goal = talkGoal(phrase=phrase, from_language=from_language, to_language=to_language)
+        self.client_talk.send_goal(goal)
+        self.client_talk.wait_for_result()
+        return self.client_talk.get_result()
 
-        def hear(self, srv: List) -> hearResult:
-            """
-            A method that listens to a service
-            """
-            goal = hearGoal(spec=srv.spec, choices=srv.choices)
-            self.client_hear.send_goal(goal)
-            self.client_hear.wait_for_result()
-            return self.client_hear.get_result()
+    def hear(self, srv) -> hearResult:
+        """
+        A method that listens to a service
+        """
+        goal = hearGoal(spec=srv.spec, choices=srv.choices)
+        self.client_hear.send_goal(goal)
+        self.client_hear.wait_for_result()
+        return self.client_hear.get_result()
 
-        def play_sound(self, sound: str):
-            """
-            A method that plays a sound
-            """
-            audio = AudioSegment.from_file(file=(str(rospack.getpath('speech_recognition') + '/sounds/' + sound + '.mp3')))
-            play(audio)
+    def play_sound(self, sound: str):
+        """
+        A method that plays a sound
+        """
+        audio = AudioSegment.from_file(file=(str(self.rospack.getpath('speech_recognition') + '/sounds/' + sound + '.mp3')))
+        play(audio)
 
         
